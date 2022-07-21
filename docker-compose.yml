@@ -1,0 +1,57 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./frontend-student-manager
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      API_BASE_URL: "${api-back}"
+    networks:
+      - students-app
+    depends_on:
+      - api-back
+
+  api-back:
+    build:
+      context: ./team-project
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionInfoSQL__DataBaseName: "StudentManagerDB"
+      ConnectionInfoSQL__Host: "sqlserverdb"
+      ConnectionInfoSQL__userDb: "sa"
+      ConnectionInfoSQL__Password: "Team5*Password"
+    networks:
+      - students-app
+    depends_on:
+      - sqlserverdb
+
+  # Create database container
+  sqlserverdb:
+    build:
+      context: ./db-team-project
+      dockerfile: Dockerfile
+    ports:
+      - "14033:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Team5*Password"
+      MSSQL_PID: "Express"
+    networks:
+      - students-app
+    volumes:
+      - sql-data:/var/opt/mssql
+
+volumes:
+  sql-data:
+    driver: local
+networks:
+  students-app:
+    name: students-app
+    driver: bridge
+    ipam:
+      driver: default

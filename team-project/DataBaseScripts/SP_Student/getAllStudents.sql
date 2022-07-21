@@ -1,0 +1,3 @@
+CREATE PROCEDURE getAllStudents
+AS
+SELECT * FROM Student
